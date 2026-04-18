@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1">
+<title>xAI: Understand the Universe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;550;600;700&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --background:#000000;
+  --foreground:#ffffff;
+  --primary:#ffffff;
+  --secondary:#a1a1aa;
+  --accent:#d07840;
+  --border:rgba(255,255,255,0.1);
+  --muted:rgba(255,255,255,0.5);
+  --card:rgba(255,255,255,0.03);
+  --card-hover:rgba(255,255,255,0.06);
+  --font-sans:'Inter',ui-monospace,SFMono-Regular,Roboto Mono,Menlo,Monaco,Liberation Mono,DejaVu Sans Mono,Courier New,monospace;
+  --font-display:'Inter',system-ui,-apple-system,sans-serif;
+}
+
+html{color-scheme:dark}
+html.dark{color-scheme:dark}
+
+body{
+  background:var(--background);
+  color:var(--foreground);
+  font-family:var(--font-display);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.5;
+}
+
+a{color:inherit;text-decoration:none}
+button{background:none;border:none;color:inherit;cursor:pointer;font:inherit}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px}
+
+/* ===== HEADER ===== */
+.header{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:50;
+  transition:transform 0.3s ease, opacity 0.3s ease;
+}
+.header-bg{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  opacity:0;
+  transition:opacity 0.3s ease;
+  pointer-events:none;
+  height:80px;
+}
+.header-bg-gradient{
+  position:absolute;top:0;left:0;right:0;
+  height:128px;
+  background:linear-gradient(to bottom,#000 0%,transparent 100%);
+  opacity:0;
+  transition:opacity 0.3s ease;
+  pointer-events:none;
+}
+.header.scrolled .header-bg{opacity:1}
+.header.scrolled .header-bg-gradient{opacity:0}
+.header.scrolled{backdrop-filter:blur(12px)}
+
+.nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;
+  max-width:1280px;margin:0 auto;
+  height:64px;
+}
+@media(min-width:1024px){.nav{height:80px;padding:16px 24px}}
+
+.logo-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:4px;margin:-4px;
+  border-radius:8px;
+  transition:background 0.15s ease;
+}
+.logo-btn:hover{background:rgba(255,255,255,0.1)}
+.logo-btn svg{width:32px;height:32px;color:#fff}
+
+.nav-links{display:none;align-items:center;gap:6px;list-style:none}
+@media(min-width:1024px){.nav-links{display:flex}}
+
+.nav-links a{
+  padding:6px 12px;border-radius:8px;font-size:14px;
+  color:rgba(255,255,255,0.7);
+  transition:color 0.15s ease, background 0.15s ease;
+}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,0.05)}
+
+.nav-cta{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 20px;border-radius:9999px;
+  background:#fff;color:#000;
+  font-size:14px;font-weight:550;
+  transition:opacity 0.15s ease;
+}
+.nav-cta:hover{opacity:0.85}
+.nav-cta svg{width:14px;height:14px}
+
+/* ===== HERO SECTION ===== */
+.hero{
+  position:relative;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  overflow:hidden;
+  background:radial-gradient(ellipse 60% 50% at 50% 35%,rgba(208,120,64,0.06) 0%,rgba(168,85,247,0.03) 30%,transparent 70%);
+}
+
+.hero-canvas-wrap{
+  position:absolute;inset:0;
+  pointer-events:none;
+}
+.hero-canvas-wrap canvas{
+  position:absolute;inset:0;
+  width:100%!important;height:100%!important;
+}
+
+.hero-center-orb{
+  position:absolute;
+  left:50%;top:15%;
+  width:600px;height:600px;
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+@media(min-width:1024px){.hero-center-orb{width:1000px;height:1000px;top:6%}}
+@media(min-width:1280px){.hero-center-orb{width:1200px;height:1200px}}
+.hero-center-orb canvas{width:100%!important;height:100%!important;display:block}
+
+.hero-flow-canvas{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  mask:radial-gradient(circle at center,black,transparent);
+  -webkit-mask:radial-gradient(circle at center,black,transparent);
+  pointer-events:none;
+  top:-64px;
+}
+@media(min-width:640px){.hero-flow-canvas{top:-128px}}
+
+.hero-content{
+  position:relative;z-index:10;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:24px;
+  padding:0 16px;
+  text-align:center;
+  pointer-events:auto;
+}
+
+.hero-search{
+  width:100%;max-width:560px;
+  position:relative;
+}
+.hero-search input{
+  width:100%;
+  padding:14px 48px 14px 20px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  color:#fff;font-size:15px;
+  outline:none;
+  transition:border-color 0.2s ease, background 0.2s ease;
+}
+.hero-search input::placeholder{color:rgba(255,255,255,0.4)}
+.hero-search input:focus{
+  border-color:rgba(255,255,255,0.25);
+  background:rgba(255,255,255,0.08);
+}
+.hero-search-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,0.1);
+  transition:background 0.15s ease;
+}
+.hero-search-btn:hover{background:rgba(255,255,255,0.2)}
+.hero-search-btn svg{width:18px;height:18px;color:rgba(255,255,255,0.7)}
+
+.hero-banner{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px 8px 12px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:9999px;
+  font-size:13px;color:rgba(255,255,255,0.7);
+  cursor:pointer;
+  transition:background 0.15s ease;
+}
+.hero-banner:hover{background:rgba(255,255,255,0.08)}
+.hero-banner-icon{
+  width:20px;height:20px;border-radius:50%;
+  background:linear-gradient(135deg,#d07840,#a855f7);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.hero-banner-icon svg{width:12px;height:12px;color:#fff}
+.hero-banner-text{white-space:nowrap}
+.hero-banner-arrow{color:rgba(255,255,255,0.4);display:flex;align-items:center}
+.hero-banner-arrow svg{width:14px;height:14px}
+
+/* ===== SECTION: PRODUCTS ===== */
+.section-products{
+  position:relative;
+  padding:96px 16px 64px;
+  max-width:1280px;margin:0 auto;
+}
+
+.section-label{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-sans);
+  font-size:13px;font-weight:500;
+  letter-spacing:0.05em;
+  color:var(--secondary);
+  margin-bottom:16px;
+}
+.section-label .bracket{color:var(--accent);font-weight:600}
+
+.section-title{
+  font-size:clamp(32px,5vw,56px);
+  font-weight:550;
+  line-height:1.1;
+  letter-spacing:-0.02em;
+  margin-bottom:48px;
+}
+
+.products-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+@media(min-width:768px){.products-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+
+.product-card{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:32px;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  min-height:320px;
+  overflow:hidden;
+  transition:border-color 0.2s ease, background 0.2s ease;
+}
+.product-card:hover{
+  border-color:rgba(255,255,255,0.15);
+  background:var(--card-hover);
+}
+.product-card-header{margin-bottom:16px}
+.product-card-title{
+  font-size:22px;font-weight:600;
+  margin-bottom:8px;
+  color:#fff;
+}
+.product-card-desc{
+  font-size:15px;line-height:1.6;
+  color:var(--secondary);
+}
+
+.product-card-visual{
+  position:absolute;
+  bottom:0;right:0;
+  width:55%;height:50%;
+  opacity:0;
+  transition:opacity 0.15s ease;
+  pointer-events:none;
+}
+.product-card:hover .product-card-visual{opacity:1}
+
+.product-card-cta{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:14px;font-weight:500;
+  color:#fff;
+  padding:8px 16px;
+  border-radius:9999px;
+  background:rgba(255,255,255,0.08);
+  transition:background 0.15s ease;
+  align-self:flex-start;
+  margin-top:auto;
+}
+.product-card-cta:hover{background:rgba(255,255,255,0.14)}
+.product-card-cta svg{width:14px;height:14px;transition:transform 0.15s ease}
+.product-card-cta:hover svg{transform:translateX(2px)}
+
+/* ===== SECTION: UNDERSTAND ===== */
+.section-understand{
+  position:relative;
+  padding:128px 16px 128px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  overflow:hidden;
+  min-height:80vh;
+  background:radial-gradient(ellipse 50% 40% at 50% 50%,rgba(208,120,64,0.04) 0%,rgba(168,85,247,0.02) 40%,transparent 70%);
+}
+
+.understand-text{
+  display:flex;flex-direction:column;
+  align-items:center;
+  gap:0;
+}
+
+.understand-line{
+  font-size:clamp(48px,10vw,120px);
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-0.03em;
+  background:linear-gradient(180deg,#ffffff 0%,rgba(255,255,255,0.4) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  opacity:0;
+  transform:translateY(40px);
+  animation:fadeUpIn 1s ease forwards;
+}
+.understand-line:nth-child(1){animation-delay:0.2s}
+.understand-line:nth-child(2){animation-delay:0.5s}
+
+@keyframes fadeUpIn{
+  to{opacity:1;transform:translateY(0)}
+}
+
+.understand-particles{
+  position:absolute;inset:0;
+  pointer-events:none;
+}
+
+/* ===== SECTION: SUPERGROK ===== */
+.section-supergrok{
+  position:relative;
+  padding:64px 16px;
+  max-width:1280px;margin:0 auto;
+}
+.supergrok-card{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  min-height:400px;
+}
+@media(min-width:768px){.supergrok-card{flex-direction:row;min-height:360px}}
+.supergrok-visual{
+  position:relative;
+  flex:1;min-height:200px;
+  overflow:hidden;
+}
+.supergrok-visual canvas{
+  position:absolute;inset:0;
+  width:100%!important;height:100%!important;
+}
+.supergrok-content{
+  flex:1;
+  padding:40px;
+  display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:center;
+  gap:16px;
+}
+.supergrok-content h3{
+  font-size:28px;font-weight:600;
+  line-height:1.2;
+}
+.supergrok-content p{
+  font-size:15px;line-height:1.6;
+  color:var(--secondary);
+}
+.supergrok-cta{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:14px;font-weight:500;
+  color:#fff;
+  padding:10px 20px;
+  border-radius:9999px;
+  background:rgba(255,255,255,0.1);
+  transition:background 0.15s ease;
+  margin-top:8px;
+}
+.supergrok-cta:hover{background:rgba(255,255,255,0.18)}
+.supergrok-cta svg{width:14px;height:14px;transition:transform 0.15s ease}
+.supergrok-cta:hover svg{transform:translateX(2px)}
+
+/* ===== SECTION: NEWS ===== */
+.section-news{
+  padding:64px 16px 96px;
+  max-width:1280px;margin:0 auto;
+}
+.news-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:32px;
+  flex-wrap:wrap;gap:16px;
+}
+.news-header-left{display:flex;align-items:center;gap:16px}
+.news-more{
+  font-size:14px;color:var(--secondary);
+  display:flex;align-items:center;gap:4px;
+  transition:color 0.15s ease;
+}
+.news-more:hover{color:#fff}
+.news-more svg{width:14px;height:14px;transition:transform 0.15s ease}
+.news-more:hover svg{transform:translateX(2px)}
+
+.news-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+@media(min-width:768px){.news-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.news-grid{grid-template-columns:repeat(3,1fr)}}
+
+.news-card{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:28px;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  min-height:280px;
+  transition:border-color 0.2s ease, background 0.2s ease;
+  overflow:hidden;
+}
+.news-card:hover{
+  border-color:rgba(255,255,255,0.15);
+  background:var(--card-hover);
+}
+.news-date{font-size:13px;color:var(--secondary);margin-bottom:12px}
+.news-title{
+  font-size:20px;font-weight:600;
+  line-height:1.3;
+  margin-bottom:8px;
+}
+.news-desc{font-size:14px;color:var(--secondary);line-height:1.5;flex:1}
+.news-tag{
+  display:inline-block;
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:9999px;
+  background:rgba(255,255,255,0.06);
+  color:var(--secondary);
+  margin-top:16px;
+}
+.news-read{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:13px;color:var(--secondary);
+  margin-top:12px;
+  transition:color 0.15s ease;
+}
+.news-read:hover{color:#fff}
+.news-read svg{width:14px;height:14px;transition:transform 0.15s ease}
+.news-read:hover svg{transform:translateX(2px)}
+
+/* ===== FOOTER ===== */
+.footer{
+  border-top:1px solid var(--border);
+  padding:48px 16px 32px;
+  max-width:1280px;margin:0 auto;
+}
+.footer-top{
+  display:flex;flex-direction:column;gap:32px;
+  margin-bottom:48px;
+}
+@media(min-width:768px){
+  .footer-top{flex-direction:row;justify-content:space-between;align-items:flex-start}
+}
+.footer-try{
+  font-size:24px;font-weight:600;
+  margin-bottom:12px;
+}
+.footer-links-row{display:flex;gap:24px;flex-wrap:wrap}
+.footer-links-row a{
+  font-size:15px;color:var(--secondary);
+  transition:color 0.15s ease;
+}
+.footer-links-row a:hover{color:#fff}
+
+.footer-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:32px;
+  padding-bottom:32px;
+  border-bottom:1px solid var(--border);
+}
+@media(min-width:768px){.footer-grid{grid-template-columns:repeat(5,1fr)}}
+
+.footer-col-title{
+  font-size:13px;font-weight:600;
+  color:var(--secondary);
+  margin-bottom:12px;
+  letter-spacing:0.03em;
+}
+.footer-col a{
+  display:block;font-size:14px;
+  color:rgba(255,255,255,0.6);
+  padding:4px 0;
+  transition:color 0.15s ease;
+}
+.footer-col a:hover{color:#fff}
+
+.footer-bottom{
+  padding-top:24px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;color:rgba(255,255,255,0.3);
+}
+
+/* ===== MARQUEE ===== */
+@keyframes marquee{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+.animate-marquee{animation:8s linear infinite marquee}
+
+/* ===== SCROLL REVEAL ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ===== GLOW LINE ===== */
+.glow-line{
+  position:absolute;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(208,120,64,0.4),rgba(168,85,247,0.3),transparent);
+  width:60%;
+  left:20%;
+}
+
+/* ===== GRADIENT OVERLAYS ===== */
+.gradient-top{
+  position:absolute;top:0;left:0;right:0;height:200px;
+  background:linear-gradient(to bottom,#000 0%,transparent 100%);
+  pointer-events:none;z-index:2;
+}
+.gradient-bottom{
+  position:absolute;bottom:0;left:0;right:0;height:200px;
+  background:linear-gradient(to top,#000 0%,transparent 100%);
+  pointer-events:none;z-index:2;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header" id="header">
+  <div class="header-bg-gradient"></div>
+  <div class="header-bg"></div>
+  <nav class="nav">
+    <a href="#" class="logo-btn" aria-label="xAI Homepage">
+      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M2.30047 8.77631L12.0474 23H16.3799L6.63183 8.77631H2.30047ZM6.6285 16.6762L2.29492 23H6.63072L8.79584 19.8387L6.6285 16.6762ZM17.3709 1L9.88007 11.9308L12.0474 15.0944L21.7067 1H17.3709ZM18.1555 7.76374V23H21.7067V2.5818L18.1555 7.76374Z"/>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">Grok</a></li>
+      <li><a href="#">API</a></li>
+      <li><a href="#">Company</a></li>
+      <li><a href="#">Colossus</a></li>
+      <li><a href="#">Careers</a></li>
+      <li><a href="#">News</a></li>
+      <li><a href="#">Shop</a></li>
+      <li><a href="#">SpaceX</a></li>
+      <li><a href="#" style="font-family:serif">𝕏</a></li>
+    </ul>
+    <a href="#" class="nav-cta">
+      Try Grok
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+    </a>
+  </nav>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero-canvas-wrap">
+    <canvas id="heroParticles"></canvas>
+  </div>
+  <div class="hero-center-orb" id="orbWrap">
+    <canvas id="heroOrb"></canvas>
+  </div>
+  <canvas class="hero-flow-canvas" id="heroFlow"></canvas>
+  <div class="gradient-top"></div>
+  <div class="gradient-bottom"></div>
+
+  <div class="hero-content" style="margin-top:auto;padding-bottom:12vh">
+    <div class="hero-search">
+      <input type="text" placeholder="What do you want to know?" id="searchInput">
+      <button class="hero-search-btn" aria-label="Submit a query to Grok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="hero-banner" onclick="window.open('https://spacex.com/updates#xai-joins-spacex','_blank')">
+      <div class="hero-banner-icon">
+        <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.5"><path d="M6 2v8M2 6h8"/></svg>
+      </div>
+      <span class="hero-banner-text"><strong>xAI joins SpaceX:</strong>&nbsp;SpaceX has acquired xAI to accelerate humanity's future.</span>
+      <span class="hero-banner-arrow">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCTS ===== -->
+<section class="section-products reveal" id="products">
+  <div class="section-label"><span class="bracket">[</span> Products <span class="bracket">]</span></div>
+  <h1 class="section-title">AI for all humanity</h1>
+  <div class="products-grid">
+    <div class="product-card">
+      <div class="product-card-header">
+        <div class="product-card-title">Grok</div>
+        <p class="product-card-desc">Grok is your cosmic guide, now accessible on grok.com, iOS, and Android. Explore the universe with AI.</p>
+      </div>
+      <a href="#" class="product-card-cta">Use now <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    </div>
+    <div class="product-card">
+      <div class="product-card-header">
+        <div class="product-card-title">API</div>
+        <p class="product-card-desc">Supercharge your applications with Grok's enhanced speed, precision, and multilingual capabilities.</p>
+      </div>
+      <a href="#" class="product-card-cta">Build now <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    </div>
+    <div class="product-card">
+      <div class="product-card-header">
+        <div class="product-card-title">Developer Docs</div>
+        <p class="product-card-desc">Learn how to quickly install Grok at the heart of your applications and explore guides covering common use cases.</p>
+      </div>
+      <a href="#" class="product-card-cta">Learn more <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== UNDERSTAND THE UNIVERSE ===== -->
+<section class="section-understand reveal" id="understand">
+  <canvas class="understand-particles" id="understandParticles"></canvas>
+  <div class="understand-text">
+    <div class="understand-line">Understand</div>
+    <div class="understand-line">The Universe</div>
+  </div>
+</section>
+
+<!-- ===== SUPERGROK ===== -->
+<section class="section-supergrok reveal" id="supergrok">
+  <div class="supergrok-card">
+    <div class="supergrok-visual">
+      <canvas id="supergrokCanvas"></canvas>
+    </div>
+    <div class="supergrok-content">
+      <h3>Do more with Grok.<br>Unlock a SuperGrok subscription on Grok.com.</h3>
+      <p>We've just launched SuperGrok Heavy, providing access to Grok Heavy and much higher rate limits.</p>
+      <a href="#" class="supergrok-cta">Sign up now <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NEWS ===== -->
+<section class="section-news reveal" id="news">
+  <div class="section-label"><span class="bracket">[</span> Blog <span class="bracket">]</span></div>
+  <div class="news-header">
+    <h2 class="section-title" style="margin-bottom:0;font-size:clamp(28px,4vw,40px)">Latest news</h2>
+    <a href="#" class="news-more">Explore more <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+  </div>
+  <div class="news-grid">
+    <div class="news-card">
+      <div>
+        <div class="news-date">April 17, 2026</div>
+        <div class="news-title">Grok Speech to Text and Text to Speech APIs</div>
+        <p class="news-desc">Fast and accurate. Natural, expressive voices. Simple pricing. Multilingual support.</p>
+      </div>
+      <div>
+        <span class="news-tag">grok voice</span>
+        <div class="news-read">Read <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      </div>
+    </div>
+    <div class="news-card">
+      <div>
+        <div class="news-date">February 02, 2026</div>
+        <div class="news-title">xAI joins SpaceX</div>
+        <p class="news-desc">SpaceX announced today that it has acquired xAI.</p>
+      </div>
+      <div>
+        <span class="news-tag">company</span>
+        <div class="news-read">Read <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      </div>
+    </div>
+    <div class="news-card">
+      <div>
+        <div class="news-date">January 28, 2026</div>
+        <div class="news-title">Grok Imagine API</div>
+        <p class="news-desc">State-of-the-art video generation across quality, cost, and latency.</p>
+      </div>
+      <div>
+        <span class="news-tag">grok</span>
+        <div class="news-read">Read <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer" id="footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-try">Try Grok On</div>
+      <div class="footer-links-row">
+        <a href="#">Web</a>
+        <a href="#">iOS</a>
+        <a href="#">Android</a>
+        <a href="#">Grok on X</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <div class="footer-col-title">Products</div>
+      <a href="#">Grok</a>
+      <a href="#">𝕏</a>
+      <a href="#">Grok Enterprise</a>
+      <a href="#">Grokipedia</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">API</div>
+      <a href="#">Overview</a>
+      <a href="#">Voice API</a>
+      <a href="#">Imagine API</a>
+      <a href="#">Pricing</a>
+      <a href="#">API Console Login</a>
+      <a href="#">Documentation</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Company</div>
+      <a href="#">Company</a>
+      <a href="#">Careers</a>
+      <a href="#">Contact</a>
+      <a href="#">News</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Resources</div>
+      <a href="#">Privacy policy</a>
+      <a href="#">Privacy portal</a>
+      <a href="#">Security</a>
+      <a href="#">Safety</a>
+      <a href="#">Legal</a>
+      <a href="#">Status</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 xAI</span>
+    <span>All rights reserved</span>
+  </div>
+</footer>
+
+<script>
+/* =================================================================
+   WEBGL PARTICLE SYSTEM — Hero Background
+   ================================================================= */
+(function(){
+  const canvas = document.getElementById('heroParticles');
+  const gl = canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:false,antialias:false});
+  if(!gl) return;
+
+  let W,H,dpr;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio,2);
+    W=canvas.clientWidth*dpr;H=canvas.clientHeight*dpr;
+    canvas.width=W;canvas.height=H;
+    gl.viewport(0,0,W,H);
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  const vsSrc=`#version 300 es
+precision highp float;
+in vec2 aPos;
+in float aSize;
+in float aAlpha;
+in vec3 aCol;
+uniform float uTime;
+uniform float uDpr;
+out float vAlpha;
+out vec3 vCol;
+void main(){
+  float t=uTime;
+  vec2 p=aPos;
+  float d=length(p);
+  float spiral=atan(p.y,p.x)+t*0.15*(1.0-d*0.5);
+  p.x=d*cos(spiral)*1.001;
+  p.y=d*sin(spiral)*1.001;
+  p.y+=sin(t*0.4+p.x*3.0)*0.012;
+  p.x+=cos(t*0.3+p.y*2.0)*0.008;
+  float breathe=1.0+0.03*sin(t*0.5);
+  p*=breathe;
+  vAlpha=aAlpha*(0.6+0.4*sin(t*1.0+aPos.x*4.0+aPos.y*3.0));
+  vCol=aCol;
+  gl_Position=vec4(p,0.0,1.0);
+  gl_PointSize=aSize*uDpr*(0.85+0.15*sin(t*1.5+aPos.y*5.0));
+}`;
+
+  const fsSrc=`#version 300 es
+precision highp float;
+in float vAlpha;
+in vec3 vCol;
+out vec4 frag;
+void main(){
+  vec2 c=gl_PointCoord-0.5;
+  float d=length(c);
+  if(d>0.5)discard;
+  float a=smoothstep(0.5,0.1,d)*vAlpha;
+  frag=vec4(vCol,a);
+}`;
+
+  function compileShader(src,type){
+    const s=gl.createShader(type);
+    gl.shaderSource(s,src);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(s));return null}
+    return s;
+  }
+  const vs=compileShader(vsSrc,gl.VERTEX_SHADER);
+  const fs=compileShader(fsSrc,gl.FRAGMENT_SHADER);
+  const prog=gl.createProgram();
+  gl.attachShader(prog,vs);gl.attachShader(prog,fs);gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){console.error(gl.getProgramInfoLog(prog));return}
+  gl.useProgram(prog);
+
+  const COUNT=1200;
+  const pos=new Float32Array(COUNT*2);
+  const size=new Float32Array(COUNT);
+  const alpha=new Float32Array(COUNT);
+  const col=new Float32Array(COUNT*3);
+
+  for(let i=0;i<COUNT;i++){
+    const angle=Math.random()*Math.PI*2;
+    const radius=Math.random()*1.2;
+    pos[i*2]=Math.cos(angle)*radius;
+    pos[i*2+1]=Math.sin(angle)*radius;
+    const dist=Math.sqrt(pos[i*2]*pos[i*2]+pos[i*2+1]*pos[i*2+1]);
+    size[i]=Math.random()*3.0+0.5+(dist<0.4?2.0:0);
+    alpha[i]=Math.random()*0.6+0.15+(dist<0.5?0.3:0);
+    const r=Math.random();
+    if(r<0.35){col[i*3]=0.85+Math.random()*0.15;col[i*3+1]=0.5+Math.random()*0.25;col[i*3+2]=0.2+Math.random()*0.15}
+    else if(r<0.6){col[i*3]=0.5+Math.random()*0.3;col[i*3+1]=0.3+Math.random()*0.3;col[i*3+2]=0.85+Math.random()*0.15}
+    else{col[i*3]=0.7+Math.random()*0.3;col[i*3+1]=0.7+Math.random()*0.3;col[i*3+2]=0.75+Math.random()*0.25}
+  }
+
+  function makeBuf(data,attr,components){
+    const buf=gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+    const loc=gl.getAttribLocation(prog,attr);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc,components,gl.FLOAT,false,0,0);
+    return buf;
+  }
+  makeBuf(pos,'aPos',2);
+  makeBuf(size,'aSize',1);
+  makeBuf(alpha,'aAlpha',1);
+  makeBuf(col,'aCol',3);
+
+  const uTime=gl.getUniformLocation(prog,'uTime');
+  const uDpr=gl.getUniformLocation(prog,'uDpr');
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  gl.clearColor(0,0,0,0);
+
+  function draw(t){
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime,t*0.001);
+    gl.uniform1f(uDpr,dpr);
+    gl.drawArrays(gl.POINTS,0,COUNT);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* =================================================================
+   WEBGL ORB — Center Sphere
+   ================================================================= */
+(function(){
+  const canvas=document.getElementById('heroOrb');
+  const gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:false,antialias:true});
+  if(!gl)return;
+
+  let W,H,dpr;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio,2);
+    const rect=canvas.parentElement.getBoundingClientRect();
+    W=rect.width*dpr;H=rect.height*dpr;
+    canvas.width=W;canvas.height=H;
+    gl.viewport(0,0,W,H);
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  const vsSrc=`#version 300 es
+precision highp float;
+in vec2 aPos;
+out vec2 vUv;
+void main(){
+  vUv=aPos*0.5+0.5;
+  gl_Position=vec4(aPos,0.0,1.0);
+}`;
+
+  const fsSrc=`#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform float uTime;
+uniform vec2 uRes;
+out vec4 frag;
+
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  f=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+}
+float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<5;i++){v+=a*noise(p);p*=2.0;a*=0.5;}return v;}
+
+void main(){
+  vec2 uv=vUv;
+  float asp=uRes.x/uRes.y;
+  uv.x*=asp;
+  vec2 center=vec2(asp*0.5,0.5);
+  float d=length(uv-center);
+
+  float t=uTime*0.15;
+
+  float ring=smoothstep(0.42,0.36,d)*smoothstep(0.22,0.28,d);
+  ring*=0.5+0.35*sin(d*35.0-t*4.0);
+  ring+=smoothstep(0.48,0.44,d)*smoothstep(0.36,0.40,d)*0.15;
+  ring+=smoothstep(0.28,0.22,d)*smoothstep(0.18,0.22,d)*0.2;
+
+  float glow=exp(-d*2.8)*0.9;
+  float inner=smoothstep(0.35,0.0,d)*0.2;
+  float coreGlow=exp(-d*8.0)*0.4;
+
+  float t2=t*0.12;
+  float n=fbm(uv*3.0+vec2(t2,t2*0.7));
+  float n2=fbm(uv*5.0-vec2(t2*0.5,t2*1.1));
+  float n3=fbm(uv*8.0+vec2(t2*1.3,-t2*0.9));
+
+  vec3 c1=vec3(0.88,0.52,0.22);
+  vec3 c2=vec3(0.66,0.33,0.97);
+  vec3 c3=vec3(1.0,0.97,0.92);
+  vec3 c4=vec3(0.95,0.7,0.5);
+
+  vec3 col=mix(c1,c2,n)*ring;
+  col+=mix(c1,c4,n3)*ring*0.3;
+  col+=c3*glow*(0.6+n2*0.4);
+  col+=mix(c1,c2,n2)*inner;
+  col+=c3*coreGlow;
+  col+=vec3(0.6,0.45,0.7)*smoothstep(0.5,0.3,d)*0.06;
+  col+=vec3(1.0,0.85,0.6)*smoothstep(0.15,0.0,d)*0.15;
+
+  float alpha=ring+glow*0.9+inner*0.6+coreGlow*0.5;
+  alpha=clamp(alpha,0.0,1.0);
+
+  frag=vec4(col,alpha);
+}`;
+
+  function compileShader(src,type){
+    const s=gl.createShader(type);
+    gl.shaderSource(s,src);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(s));return null}
+    return s;
+  }
+  const vs=compileShader(vsSrc,gl.VERTEX_SHADER);
+  const fs=compileShader(fsSrc,gl.FRAGMENT_SHADER);
+  const prog=gl.createProgram();
+  gl.attachShader(prog,vs);gl.attachShader(prog,fs);gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){console.error(gl.getProgramInfoLog(prog));return}
+  gl.useProgram(prog);
+
+  const posBuf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const aPos=gl.getAttribLocation(prog,'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
+
+  const uTime=gl.getUniformLocation(prog,'uTime');
+  const uRes=gl.getUniformLocation(prog,'uRes');
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  gl.clearColor(0,0,0,0);
+
+  function draw(t){
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime,t*0.001);
+    gl.uniform2f(uRes,W,H);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* =================================================================
+   2D CANVAS — Flow Lines (hero)
+   ================================================================= */
+(function(){
+  const canvas=document.getElementById('heroFlow');
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return;
+
+  let W,H,dpr;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio,2);
+    W=canvas.clientWidth*dpr;H=canvas.clientHeight*dpr;
+    canvas.width=W;canvas.height=H;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  const lines=[];
+  const LINE_COUNT=60;
+  for(let i=0;i<LINE_COUNT;i++){
+    lines.push({
+      x:Math.random()*W,
+      y:Math.random()*H,
+      vx:(Math.random()-0.5)*1.0,
+      vy:-Math.random()*1.8-0.4,
+      len:Math.random()*80+30,
+      alpha:Math.random()*0.18+0.06,
+      hue:Math.random()>0.5?25:270,
+      width:Math.random()*1.5+0.5
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(const l of lines){
+      l.x+=l.vx*dpr;
+      l.y+=l.vy*dpr;
+      if(l.y<-l.len){l.y=H+l.len;l.x=Math.random()*W}
+      if(l.x<0)l.x=W;
+      if(l.x>W)l.x=0;
+
+      const grad=ctx.createLinearGradient(l.x,l.y,l.x,l.y-l.len*dpr);
+      const h=l.hue;
+      grad.addColorStop(0,`hsla(${h},70%,60%,0)`);
+      grad.addColorStop(0.5,`hsla(${h},70%,60%,${l.alpha})`);
+      grad.addColorStop(1,`hsla(${h},70%,60%,0)`);
+      ctx.beginPath();
+      ctx.moveTo(l.x,l.y);
+      ctx.lineTo(l.x,l.y-l.len*dpr);
+      ctx.strokeStyle=grad;
+      ctx.lineWidth=l.width*dpr;
+      ctx.stroke();
+      
+      const dotR=l.width*0.8*dpr;
+      if(dotR>0.5){
+        ctx.beginPath();
+        ctx.arc(l.x,l.y-l.len*dpr,Math.max(0.5,dotR),0,Math.PI*2);
+        ctx.fillStyle=`hsla(${l.hue},70%,70%,${l.alpha*1.5})`;
+        ctx.fill();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* =================================================================
+   2D CANVAS — Understand Section Particles
+   ================================================================= */
+(function(){
+  const canvas=document.getElementById('understandParticles');
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return;
+
+  let W,H,dpr;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio,2);
+    const rect=canvas.parentElement.getBoundingClientRect();
+    W=rect.width*dpr;H=rect.height*dpr;
+    canvas.width=W;canvas.height=H;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  const particles=[];
+  const COUNT=300;
+  for(let i=0;i<COUNT;i++){
+    const angle=Math.random()*Math.PI*2;
+    const rad=Math.random();
+    particles.push({
+      x:0.5+Math.cos(angle)*rad*0.45*W,
+      y:0.5+Math.sin(angle)*rad*0.35*H,
+      r:Math.random()*2.0+0.5,
+      vx:(Math.random()-0.5)*0.4,
+      vy:(Math.random()-0.5)*0.4,
+      alpha:Math.random()*0.6+0.1,
+      phase:Math.random()*Math.PI*2,
+      isHub:Math.random()<0.08
+    });
+  }
+
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    const s=t*0.001;
+    for(const p of particles){
+      p.x+=p.vx*dpr+Math.sin(s+p.phase)*0.2*dpr;
+      p.y+=p.vy*dpr+Math.cos(s*0.7+p.phase)*0.15*dpr;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+
+      const a=p.alpha*(0.6+0.4*Math.sin(s*2+p.phase));
+      const r=p.r*dpr*(0.8+0.2*Math.sin(s+p.phase*3));
+      if(p.isHub){
+        const hubR=r*2.5;
+        const hubGrad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,Math.max(1,hubR));
+        hubGrad.addColorStop(0,`rgba(208,120,64,${a*0.8})`);
+        hubGrad.addColorStop(0.5,`rgba(168,85,247,${a*0.3})`);
+        hubGrad.addColorStop(1,`rgba(208,120,64,0)`);
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,Math.max(1,hubR),0,Math.PI*2);
+        ctx.fillStyle=hubGrad;
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,Math.max(0.5,r),0,Math.PI*2);
+      const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,Math.max(0.5,r));
+      grad.addColorStop(0,`rgba(255,255,255,${a})`);
+      grad.addColorStop(1,`rgba(255,255,255,0)`);
+      ctx.fillStyle=grad;
+      ctx.fill();
+    }
+
+    const connDist=120*dpr;
+    const hubs=particles.filter(p=>p.isHub);
+    for(const h of hubs){
+      for(const p of particles){
+        if(p===h)continue;
+        const dx=h.x-p.x;const dy=h.y-p.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<connDist){
+          const lineA=(1-dist/connDist)*0.08;
+          ctx.beginPath();
+          ctx.moveTo(h.x,h.y);
+          ctx.lineTo(p.x,p.y);
+          ctx.strokeStyle=`rgba(208,120,64,${lineA})`;
+          ctx.lineWidth=0.5*dpr;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* =================================================================
+   2D CANVAS — SuperGrok Section Glow
+   ================================================================= */
+(function(){
+  const canvas=document.getElementById('supergrokCanvas');
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return;
+
+  let W,H,dpr;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio,2);
+    const rect=canvas.parentElement.getBoundingClientRect();
+    W=rect.width*dpr;H=rect.height*dpr;
+    canvas.width=W;canvas.height=H;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  const orbs=[];
+  for(let i=0;i<10;i++){
+    orbs.push({
+      x:Math.random()*W,
+      y:Math.random()*H,
+      r:Math.random()*140+60,
+      vx:(Math.random()-0.5)*0.6,
+      vy:(Math.random()-0.5)*0.6,
+      hue:i%2===0?25:270,
+      alpha:Math.random()*0.2+0.08,
+      phase:Math.random()*Math.PI*2
+    });
+  }
+
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    const s=t*0.001;
+    for(const o of orbs){
+      o.x+=o.vx*dpr+Math.sin(s+o.r)*0.3*dpr;
+      o.y+=o.vy*dpr+Math.cos(s*0.8+o.r)*0.3*dpr;
+      if(o.x<-o.r)o.x=W+o.r;if(o.x>W+o.r)o.x=-o.r;
+      if(o.y<-o.r)o.y=H+o.r;if(o.y>H+o.r)o.y=-o.r;
+
+      const pulse=1+0.15*Math.sin(s*1.5+o.r);
+      const rd=o.r*dpr*pulse;
+      const grad=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,Math.max(1,rd));
+      grad.addColorStop(0,`hsla(${o.hue},70%,55%,${o.alpha})`);
+      grad.addColorStop(0.5,`hsla(${o.hue},70%,45%,${o.alpha*0.3})`);
+      grad.addColorStop(1,`hsla(${o.hue},70%,35%,0)`);
+      ctx.beginPath();
+      ctx.arc(o.x,o.y,Math.max(1,rd),0,Math.PI*2);
+      ctx.fillStyle=grad;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* =================================================================
+   SCROLL EFFECTS
+   ================================================================= */
+(function(){
+  const header=document.getElementById('header');
+  let lastScroll=0;
+  window.addEventListener('scroll',()=>{
+    const y=window.scrollY;
+    if(y>50)header.classList.add('scrolled');
+    else header.classList.remove('scrolled');
+    lastScroll=y;
+  },{passive:true});
+
+  const reveals=document.querySelectorAll('.reveal');
+  const observer=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+      }
+    });
+  },{threshold:0.15,rootMargin:'0px 0px -40px 0px'});
+  reveals.forEach(el=>observer.observe(el));
+})();
+
+/* =================================================================
+   MOUSE PARALLAX — Hero Orb
+   ================================================================= */
+(function(){
+  const orb=document.getElementById('orbWrap');
+  if(!orb)return;
+  document.addEventListener('mousemove',(e)=>{
+    const cx=window.innerWidth/2;
+    const cy=window.innerHeight/2;
+    const dx=(e.clientX-cx)/cx;
+    const dy=(e.clientY-cy)/cy;
+    orb.style.transform=`translateX(calc(-50% + ${dx*15}px)) translateY(${dy*10}px)`;
+  });
+})();
+</script>
+</body>
+</html>
